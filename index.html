@@ -180,7 +180,16 @@
                 
                 badgeClass = "bg-orange-100 text-orange-700"; 
                 badgeText = "สิทธิแบบเฉลี่ย (Pro-rate)";
-                message = `คำนวณสิทธิแบบเฉลี่ยตามสัดส่วนวันทำงาน<br>อายุงาน ${daysWorked} วัน ได้รับสิทธิจริง ${rawLeave.toFixed(2)} วัน (ปัดเศษเป็น ${leaveDays} วัน)`;
+                
+                // อัปเดตการแสดงผลสูตร Pro-rate
+                message = `
+                    คำนวณสิทธิแบบเฉลี่ยตามสัดส่วนวันทำงาน<br>
+                    <div class="bg-white/60 p-3 rounded-lg mt-3 mb-2 border border-red-100 text-sm font-medium text-gray-800 shadow-sm">
+                        <span class="text-gray-500 block mb-1 text-xs">สูตรคำนวณ: (จำนวนวันทำงาน ÷ 365 วัน) × 14 วัน</span>
+                        (${daysWorked} ÷ 365) × 14 = <span class="text-red-700 font-bold">${rawLeave.toFixed(2)} วัน</span>
+                    </div>
+                    ปัดเศษตามระเบียบได้รับสิทธิจริง <strong>${leaveDays} วัน</strong>
+                `;
             } else {
                 // อายุงานเกิน 1 ปี
                 badgeClass = "bg-green-100 text-green-700";
