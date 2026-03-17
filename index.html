@@ -52,6 +52,31 @@
                                 <span class="font-semibold text-gray-500">อายุงาน:</span> 
                                 <span id="tenure-display" class="text-red-600 font-bold text-base">-</span>
                             </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                <span class="font-semibold text-gray-500">สถานะทดลองงาน:</span> 
+                                <span id="probation-status" class="font-bold text-base">-</span>
+                            </div>
+                        </div>
+
+                        <!-- เพิ่มตารางสิทธิวันลา (แสดงอ้างอิงบน UI) -->
+                        <div class="mt-6 border-t border-gray-100 pt-5">
+                            <h3 class="text-red-700 font-bold text-lg mb-3 flex items-center gap-2">
+                                <i data-lucide="list-check" class="w-5 h-5"></i> ตารางสิทธิวันลา
+                            </h3>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
+                                    <span>อายุงาน < 2 ปี</span>
+                                    <span class="font-bold text-gray-900 text-base">14 วัน</span>
+                                </li>
+                                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
+                                    <span>อายุงาน 2 - < 5 ปี</span>
+                                    <span class="font-bold text-gray-900 text-base">17 วัน</span>
+                                </li>
+                                <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
+                                    <span>อายุงาน ≥ 5 ปี / บริหาร</span>
+                                    <span class="font-bold text-gray-900 text-base">19 วัน</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
@@ -96,10 +121,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // สร้าง Icon จาก Lucide
             lucide.createIcons();
             
-            // จำกัดให้เลือกวันที่ได้สูงสุดแค่วันปัจจุบัน
             const dateInput = document.getElementById('start-date');
             if(dateInput) {
                 const today = new Date().toISOString().split('T')[0];
@@ -114,108 +137,141 @@
             const startDate = new Date(startDateInput);
             const today = new Date();
             
-            // เซ็ตเวลาให้เป็นเที่ยงคืนตรง เพื่อการคำนวณวันที่แม่นยำ
             startDate.setHours(0, 0, 0, 0); 
             today.setHours(0, 0, 0, 0);
 
-            // ตรวจสอบกรณีเลือกวันที่ในอนาคต
+            // เช็กกรณีเลือกวันที่ในอนาคต
             if (startDate > today) {
-                document.getElementById('result-placeholder').classList.add('hidden');
-                document.getElementById('result-content').classList.remove('hidden');
-                document.getElementById('tenure-display').innerText = "-";
-                
-                const resultBadge = document.getElementById('status-badge');
-                resultBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-700";
-                resultBadge.innerText = "วันที่ไม่ถูกต้อง";
-                
-                const leaveEl = document.getElementById('leave-days');
-                leaveEl.innerText = "0"; 
-                leaveEl.className = "text-gray-400";
-                
-                document.getElementById('calculation-detail').innerHTML = "วันที่เริ่มงานต้องไม่เกินวันปัจจุบัน";
+                showError("วันที่เริ่มงานต้องไม่เกินวันปัจจุบัน");
                 return;
             }
             
-            // คำนวณจำนวนวันทำงานและอายุงาน (ปี)
+            // --- คำนวณจำนวนวันทำงาน ---
             let diffTime = Math.abs(today - startDate);
             let daysWorked = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            let tenureYears = daysWorked / 365.25;
+            let tenureYears = daysWorked / 365.25; // คำนวณอายุงานเป็นปีตามปฏิทิน
             
-            // คำนวณ ปี/เดือน สำหรับแสดงผลสวยงาม
+            // --- อัปเดต UI ส่วนข้อมูลอายุงาน ---
             let y = today.getFullYear() - startDate.getFullYear();
             let m = today.getMonth() - startDate.getMonth();
             let d = today.getDate() - startDate.getDate();
-            if (d < 0) { m--; d += 30; }
+            if (d < 0) { m--; d += 30; } 
             if (m < 0) { y--; m += 12; }
             
-            // อัปเดต UI ส่วนข้อมูลตั้งต้น
             document.getElementById('current-date-display').innerText = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('tenure-display').innerText = `${y} ปี ${m} เดือน`;
+            document.getElementById('tenure-display').innerText = `${y} ปี ${m} เดือน (${daysWorked} วัน)`;
             
-            // สลับสถานะ UI
-            document.getElementById('result-placeholder').classList.add('hidden');
-            document.getElementById('result-content').classList.remove('hidden');
+            const probationStatusEl = document.getElementById('probation-status');
+            if (daysWorked < 119) {
+                probationStatusEl.innerText = "ยังไม่ผ่านทดลองงาน";
+                probationStatusEl.className = "font-bold text-base text-orange-600";
+            } else {
+                probationStatusEl.innerText = "ผ่านทดลองงานแล้ว";
+                probationStatusEl.className = "font-bold text-base text-green-600";
+            }
+            
+            // --- เตรียมตัวแปรสำหรับคำนวณ Logic ใหม่ ---
+            let baseLeave = 14; 
+            let tierText = "อายุงาน < 2 ปี";
+            
+            // เช็กตามตารางสิทธิวันลา (Tiers)
+            if (tenureYears >= 5) {
+                baseLeave = 19;
+                tierText = "อายุงาน ≥ 5 ปี / บริหาร";
+            } else if (tenureYears >= 2) {
+                baseLeave = 17;
+                tierText = "อายุงาน 2 - < 5 ปี";
+            }
 
-            const resultBadge = document.getElementById('status-badge');
-            const leaveDaysEl = document.getElementById('leave-days');
-            const detailEl = document.getElementById('calculation-detail');
-
+            const startYear = startDate.getFullYear();
+            const startMonth = startDate.getMonth() + 1; // 1-12
+            const currentYear = today.getFullYear();
+            
             let leaveDays = 0; 
             let message = ""; 
             let badgeClass = ""; 
             let badgeText = "";
 
-            // Logic การคำนวณสิทธิวันลา (อิงตามต้นฉบับ)
-            if (daysWorked <= 119) {
-                // ยังไม่พ้นทดลองงาน
-                leaveDays = 0; 
-                badgeClass = "bg-gray-100 text-gray-700"; 
+            // --- เริ่ม Logic การคำนวณ (อิงจากการผ่านโปรเป็นหลัก) ---
+            if (daysWorked < 119) {
+                // กรณีที่ 0: ยังไม่ผ่านทดลองงาน (119 วัน) - ไม่ได้สิทธิใดๆ
+                leaveDays = 0;
+                badgeClass = "bg-orange-100 text-orange-700";
                 badgeText = "อยู่ในช่วงทดลองงาน";
-                message = `อายุงาน ${daysWorked} วัน (ยังไม่พ้นทดลองงาน 119 วัน) จึงยังไม่มีสิทธิหยุดพักร้อนตามระเบียบ`;
-            } else if (tenureYears < 1) {
-                // อายุงานไม่ถึง 1 ปี (Pro-rate)
-                let rawLeave = (daysWorked / 365) * 14;
-                leaveDays = Math.round(rawLeave * 2) / 2; // ปัดเศษทีละครึ่งวัน (0.5)
-                if (leaveDays > 14) leaveDays = 14;
+                message = `อายุงานปัจจุบันของคุณคือ <strong>${daysWorked} วัน</strong><br>ตามนโยบายบริษัท คุณต้องทำงานครบ <strong>119 วัน (ผ่านทดลองงาน)</strong> ก่อน จึงจะมีสิทธิใช้วันหยุดพักผ่อนประจำปีได้`;
                 
-                badgeClass = "bg-orange-100 text-orange-700"; 
-                badgeText = "สิทธิแบบเฉลี่ย (Pro-rate)";
-                
-                // อัปเดตการแสดงผลสูตร Pro-rate
-                message = `
-                    คำนวณสิทธิแบบเฉลี่ยตามสัดส่วนวันทำงาน<br>
-                    <div class="bg-white/60 p-3 rounded-lg mt-3 mb-2 border border-red-100 text-sm font-medium text-gray-800 shadow-sm">
-                        <span class="text-gray-500 block mb-1 text-xs">สูตรคำนวณ: (จำนวนวันทำงาน ÷ 365 วัน) × 14 วัน</span>
-                        (${daysWorked} ÷ 365) × 14 = <span class="text-red-700 font-bold">${rawLeave.toFixed(2)} วัน</span>
-                    </div>
-                    ปัดเศษตามระเบียบได้รับสิทธิจริง <strong>${leaveDays} วัน</strong>
-                `;
+                // คำนวณวันที่จะผ่านโปรให้พนักงานดูด้วย
+                let passProbationDate = new Date(startDate);
+                passProbationDate.setDate(passProbationDate.getDate() + 119);
+                message += `<br><br><span class="text-sm text-red-600">คุณจะสามารถเริ่มใช้สิทธิได้ตั้งแต่วันที่: ${passProbationDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} เป็นต้นไป</span>`;
+
             } else {
-                // อายุงานเกิน 1 ปี
-                badgeClass = "bg-green-100 text-green-700";
-                if (tenureYears < 2) { 
-                    leaveDays = 14; 
-                    badgeText = "อายุงาน 1 ปี แต่ไม่ถึง 2 ปี"; 
-                    message = "คุณได้รับสิทธิวันหยุดพักผ่อนประจำปีเต็มจำนวน 14 วัน"; 
-                } else if (tenureYears < 5) { 
-                    leaveDays = 17; 
-                    badgeText = "อายุงาน 2 ปี ถึง 5 ปี"; 
-                    message = "คุณได้รับสิทธิวันหยุดพักผ่อนประจำปี 17 วัน"; 
-                } else { 
-                    leaveDays = 19; 
-                    badgeText = "อายุงาน 5 ปีขึ้นไป / ระดับบริหาร"; 
-                    message = "คุณได้รับสิทธิวันหยุดพักผ่อนประจำปีสูงสุด 19 วัน"; 
+                // ผ่านโปรแล้ว (daysWorked >= 119)
+                if (currentYear > startYear) {
+                    // กรณีที่ 1: ข้ามปีมาแล้ว และผ่านโปรแล้ว (ได้สิทธิตามขั้นอายุงาน)
+                    leaveDays = baseLeave;
+                    badgeClass = "bg-green-100 text-green-700";
+                    badgeText = tierText;
+                    message = `คุณผ่านทดลองงานแล้ว และอายุงานปัจจุบันจัดอยู่ในเกณฑ์ <strong>${tierText}</strong><br>ตามนโยบายบริษัท คุณได้รับสิทธิวันหยุดพักผ่อนประจำปี <strong>${baseLeave} วัน</strong>`;
+                    
+                } else if (currentYear === startYear) {
+                    // กรณีที่ 2: เพิ่งเริ่มงานในปีปัจจุบัน และผ่านโปรแล้ว (เช็กเดือนที่เข้า)
+                    if (startMonth <= 8) {
+                        // เข้างานเดือน 1-8 (Prorate รายเดือน)
+                        let monthsToCount = 12 - startMonth + 1;
+                        let rawLeave = (baseLeave / 12) * monthsToCount;
+                        leaveDays = parseFloat(rawLeave.toFixed(2)); // ใช้ทศนิยม 2 ตำแหน่ง
+                        
+                        badgeClass = "bg-blue-100 text-blue-700"; 
+                        badgeText = "สิทธิแบบเฉลี่ย (Pro-rate) ประจำปีแรก";
+                        message = `
+                            คุณผ่านทดลองงานแล้ว และเริ่มงานในเดือนที่ ${startMonth} (ไม่เกินเดือน 8)<br>
+                            ระบบคำนวณสิทธิแบบเฉลี่ยตามสัดส่วนเดือนที่เหลือในปีนี้:
+                            <div class="bg-white/60 p-3 rounded-lg mt-3 mb-2 border border-red-100 text-sm font-medium text-gray-800 shadow-sm">
+                                <span class="text-gray-500 block mb-1 text-xs">สูตร: (${baseLeave} วัน ÷ 12 เดือน) × เดือนที่ทำงานในปีนี้ (${monthsToCount} เดือน)</span>
+                                (${baseLeave} ÷ 12) × ${monthsToCount} = <span class="text-red-700 font-bold">${leaveDays} วัน</span>
+                            </div>
+                        `;
+                    } else {
+                        // เข้างานเดือน 9-12 (ไม่ได้สิทธิในปีแรก)
+                        leaveDays = 0;
+                        badgeClass = "bg-gray-100 text-gray-700"; 
+                        badgeText = "ยังไม่ได้รับสิทธิในปีแรก";
+                        message = `คุณผ่านทดลองงานแล้ว แต่เนื่องจากเริ่มงานในเดือนที่ ${startMonth} (ตั้งแต่เดือน 9 เป็นต้นไป) ตามนโยบายบริษัทจะยังไม่ได้รับสิทธิลาพักร้อนในปีที่เริ่มงาน<br><br>แต่คุณจะได้รับสิทธิ <strong>${baseLeave} วันเต็ม</strong> ในวันที่ 1 มกราคม ของปีถัดไป`;
+                    }
                 }
             }
 
             // แสดงผลลัพธ์ลง UI
+            document.getElementById('result-placeholder').classList.add('hidden');
+            document.getElementById('result-content').classList.remove('hidden');
+
+            const resultBadge = document.getElementById('status-badge');
             resultBadge.className = `px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${badgeClass}`;
             resultBadge.innerText = badgeText;
-            leaveDaysEl.innerText = leaveDays;
             
-            // เปลี่ยนสีตัวเลขหากเป็น 0 ให้เป็นสีเทา
+            document.getElementById('leave-days').innerText = leaveDays;
             document.getElementById('leave-days').className = leaveDays > 0 ? "text-red-600" : "text-gray-400"; 
-            detailEl.innerHTML = message;
+            
+            document.getElementById('calculation-detail').innerHTML = message;
+        }
+
+        // ฟังก์ชันช่วยแสดง Error
+        function showError(msg) {
+            document.getElementById('result-placeholder').classList.add('hidden');
+            document.getElementById('result-content').classList.remove('hidden');
+            document.getElementById('tenure-display').innerText = "-";
+            document.getElementById('probation-status').innerText = "-";
+            
+            const resultBadge = document.getElementById('status-badge');
+            resultBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-700";
+            resultBadge.innerText = "วันที่ไม่ถูกต้อง";
+            
+            const leaveEl = document.getElementById('leave-days');
+            leaveEl.innerText = "0"; 
+            leaveEl.className = "text-gray-400";
+            
+            document.getElementById('calculation-detail').innerHTML = msg;
         }
     </script>
 </body>
