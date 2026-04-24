@@ -13,11 +13,20 @@
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
         body { font-family: 'Sarabun', 'Inter', sans-serif; }
-        
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(10px); } 
             to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-content {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
     </style>
 </head>
@@ -51,14 +60,14 @@
                 <div id="input-panel" class="lg:col-span-1 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border-t-4 border-red-700 w-full flex flex-col justify-between transition-colors duration-300">
                     <div>
                         <label class="block text-base font-bold text-gray-700 mb-2" data-i18n="startDateLabel">ระบุวันที่เริ่มงาน</label>
-                        <input type="date" id="start-date" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 outline-none transition-all mb-4 text-gray-700" onchange="calculateLeave()">
+                        <input type="date" id="start-date" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 outline-none transition-all mb-4 text-gray-700" onchange="calculateLeave(false)">
                         
                         <!-- ส่วนจำลองวันที่ (ซ่อนไว้ในโหมดปกติ) -->
                         <div id="test-date-section" class="hidden mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl border-dashed fade-in">
                             <label class="block text-xs font-bold text-yellow-800 mb-2 flex items-center gap-1.5" data-i18n="simDateLabel">
                                 <i data-lucide="clock" class="w-4 h-4"></i> จำลองวันที่ปัจจุบัน (เพื่อทดสอบ)
                             </label>
-                            <input type="date" id="test-current-date" class="w-full px-3 py-2 text-sm rounded-lg border border-yellow-300 focus:ring-1 focus:ring-yellow-500 outline-none text-gray-700 bg-white shadow-sm" onchange="calculateLeave()">
+                            <input type="date" id="test-current-date" class="w-full px-3 py-2 text-sm rounded-lg border border-yellow-300 focus:ring-1 focus:ring-yellow-500 outline-none text-gray-700 bg-white shadow-sm" onchange="calculateLeave(false)">
                         </div>
                         
                         <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 text-sm space-y-3">
@@ -137,6 +146,46 @@
         </section>
     </main>
 
+    <!-- ================= MODAL POPUP ================= -->
+    <div id="result-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="modal-overlay absolute inset-0 bg-black/50" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="modal-content relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-xl text-gray-800" data-i18n="modalTitle">ผลลัพธ์การคำนวณ</h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-8 text-center" id="modal-body">
+                <div class="mb-4">
+                    <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider" id="modal-status-badge"></span>
+                </div>
+                <div class="mb-6">
+                    <span id="modal-leave-days" class="text-6xl font-extrabold text-red-600">0</span>
+                    <span class="text-2xl font-bold text-gray-500 ml-2" data-i18n="unitDays">วัน</span>
+                </div>
+                
+                <div id="modal-detail-box" class="bg-red-50 rounded-2xl p-5 text-left border border-red-100 shadow-inner">
+                    <h4 class="font-bold text-red-800 mb-2 flex items-center gap-2 text-base">
+                        <i data-lucide="info" class="w-4 h-4"></i> <span data-i18n="detailTitle">รายละเอียดการคำนวณ</span>
+                    </h4>
+                    <p id="modal-calculation-detail" class="text-sm text-red-700 leading-relaxed"></p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-6 bg-gray-50 border-t border-gray-100">
+                <button onclick="closeModal()" class="w-full bg-gray-800 text-white py-3.5 rounded-xl font-bold hover:bg-gray-900 transition-colors shadow-md active:transform active:scale-95" data-i18n="closeBtn">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State สำหรับควบคุมโหมด
         let isTestMode = false;
@@ -197,7 +246,9 @@
                 msgNoRightsYearOne: (startMonth, days) => `คุณผ่านทดลองงานแล้ว แต่เนื่องจากเริ่มงานในเดือนที่ ${startMonth} (ตั้งแต่เดือน 9 เป็นต้นไป) ตามนโยบายบริษัทจะยังไม่ได้รับสิทธิลาพักร้อนในปีที่เริ่มงาน<br><br>แต่คุณจะได้รับสิทธิ <strong>${days} วันเต็ม</strong> ในวันที่ 1 มกราคม ของปีถัดไป`,
                 
                 formatDate: (dateObj) => dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }),
-                formatTenure: (y, m, d) => `${y} ปี ${m} เดือน (${d} วัน)`
+                formatTenure: (y, m, d) => `${y} ปี ${m} เดือน (${d} วัน)`,
+                modalTitle: "ผลลัพธ์การคำนวณ",
+                closeBtn: "ตกลง"
             },
             en: {
                 appTitle: "Annual Leave Calculator",
@@ -248,7 +299,9 @@
                 msgNoRightsYearOne: (startMonth, days) => `You passed probation, but since you started in month ${startMonth} (Sep or later), you do not receive leave entitlement in the starting year.<br><br>However, you will receive full <strong>${days} days</strong> on Jan 1st of the following year.`,
                 
                 formatDate: (dateObj) => dateObj.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }),
-                formatTenure: (y, m, d) => `${y} Y ${m} M (${d} Days)`
+                formatTenure: (y, m, d) => `${y} Y ${m} M (${d} Days)`,
+                modalTitle: "Calculation Result",
+                closeBtn: "OK"
             }
         };
 
@@ -301,6 +354,28 @@
                     }
                 }
             });
+            lucide.createIcons();
+        }
+
+        function showModal() {
+            const modal = document.getElementById('result-modal');
+            const content = modal.querySelector('.modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('result-modal');
+            const content = modal.querySelector('.modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
 
         // ฟังก์ชันตรวจจับการคลิกรัวๆ เพื่อสลับโหมด
@@ -346,14 +421,14 @@
 
             // รีเฟรชผลลัพธ์ถ้ามีวันที่กรอกไว้
             if (document.getElementById('start-date').value) {
-                calculateLeave();
+                calculateLeave(false); // คำนวณใหม่โดยไม่ต้องเปิด Modal
             } else {
                 document.getElementById('result-placeholder').classList.remove('hidden');
                 document.getElementById('result-content').classList.add('hidden');
             }
         }
 
-        function calculateLeave() {
+        function calculateLeave(shouldShowModal = true) {
             const startDateInput = document.getElementById('start-date').value;
             const testDateInput = document.getElementById('test-current-date').value;
             
@@ -508,6 +583,22 @@
             leaveDaysEl.className = leaveDays > 0 ? tc.textMain : "text-gray-400"; 
             
             document.getElementById('calculation-detail').innerHTML = message;
+
+            // --- อัปเดต Modal ---
+            const modalBadge = document.getElementById('modal-status-badge');
+            modalBadge.className = `px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${badgeClass}`;
+            modalBadge.innerText = badgeText;
+            
+            const modalLeaveDays = document.getElementById('modal-leave-days');
+            modalLeaveDays.innerText = leaveDays;
+            modalLeaveDays.className = `text-6xl font-extrabold ${leaveDays > 0 ? tc.textMain : 'text-gray-400'}`;
+            
+            document.getElementById('modal-calculation-detail').innerHTML = message;
+            
+            // ปรับสี Modal Detail Box
+            document.getElementById('modal-detail-box').className = `${tc.bgLight} rounded-2xl p-5 text-left border ${tc.borderLight} shadow-inner`;
+
+            if (shouldShowModal) showModal();
         }
 
         function showError(msg) {
@@ -525,6 +616,17 @@
             leaveEl.className = "text-gray-400";
             
             document.getElementById('calculation-detail').innerHTML = msg;
+
+            // อัปเดต Modal สำหรับเคส Error
+            const modalBadge = document.getElementById('modal-status-badge');
+            modalBadge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isTestMode ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`;
+            modalBadge.innerText = t('errInvalidDate');
+            
+            document.getElementById('modal-leave-days').innerText = "0";
+            document.getElementById('modal-leave-days').className = "text-6xl font-extrabold text-gray-400";
+            document.getElementById('modal-calculation-detail').innerHTML = msg;
+            
+            showModal();
         }
     </script>
 </body>
