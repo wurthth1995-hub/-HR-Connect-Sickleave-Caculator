@@ -11,7 +11,8 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+        body { font-family: 'Sarabun', 'Inter', sans-serif; }
         
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { 
@@ -26,27 +27,35 @@
         <!-- ================= CALCULATOR SECTION ================= -->
         <section class="content-section fade-in">
             <!-- Header -->
-            <div class="flex items-center gap-3 mb-6 sm:mb-8 pb-4 border-b border-gray-200">
-                <!-- กดที่นี่รัวๆ 3 ครั้งเพื่อสลับโหมด -->
-                <div id="logo-icon" onclick="handleLogoClick()" class="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 text-white shadow-lg cursor-pointer transition-colors duration-300 relative group" title="Open Developer Mode">
-                    <i data-lucide="calculator" class="w-6 h-6 sm:w-8 sm:h-8" id="logo-svg"></i>
+            <div class="flex items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <!-- กดที่นี่รัวๆ 3 ครั้งเพื่อสลับโหมด -->
+                    <div id="logo-icon" onclick="handleLogoClick()" class="p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 text-white shadow-lg cursor-pointer transition-colors duration-300 relative group" title="Open Developer Mode">
+                        <i data-lucide="calculator" class="w-6 h-6 sm:w-8 sm:h-8" id="logo-svg"></i>
+                    </div>
+                    <div>
+                        <h2 id="app-title" class="text-xl sm:text-3xl font-extrabold text-gray-800 transition-colors" data-i18n="appTitle">คำนวณสิทธิวันลาพักร้อน</h2>
+                        <p id="app-subtitle" class="text-sm sm:text-base text-gray-500 mt-1 transition-colors" data-i18n="appSubtitle">ตรวจสอบสิทธิตามอายุงานและนโยบายบริษัท</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 id="app-title" class="text-xl sm:text-3xl font-extrabold text-gray-800 transition-colors">คำนวณสิทธิวันลาพักร้อน</h2>
-                    <p id="app-subtitle" class="text-sm sm:text-base text-gray-500 mt-1 transition-colors">ตรวจสอบสิทธิตามอายุงานและนโยบายบริษัท</p>
-                </div>
+                
+                <!-- Language Switcher -->
+                <button onclick="toggleLanguage()" id="lang-btn" class="flex items-center justify-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold text-sm transition-colors border border-gray-300 shadow-sm">
+                    <i data-lucide="globe" class="w-4 h-4"></i>
+                    <span id="lang-text">EN</span>
+                </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 <!-- Input Panel -->
                 <div id="input-panel" class="lg:col-span-1 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border-t-4 border-red-700 w-full flex flex-col justify-between transition-colors duration-300">
                     <div>
-                        <label class="block text-base font-bold text-gray-700 mb-2">ระบุวันที่เริ่มงาน</label>
+                        <label class="block text-base font-bold text-gray-700 mb-2" data-i18n="startDateLabel">ระบุวันที่เริ่มงาน</label>
                         <input type="date" id="start-date" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 outline-none transition-all mb-4 text-gray-700" onchange="calculateLeave()">
                         
                         <!-- ส่วนจำลองวันที่ (ซ่อนไว้ในโหมดปกติ) -->
                         <div id="test-date-section" class="hidden mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl border-dashed fade-in">
-                            <label class="block text-xs font-bold text-yellow-800 mb-2 flex items-center gap-1.5">
+                            <label class="block text-xs font-bold text-yellow-800 mb-2 flex items-center gap-1.5" data-i18n="simDateLabel">
                                 <i data-lucide="clock" class="w-4 h-4"></i> จำลองวันที่ปัจจุบัน (เพื่อทดสอบ)
                             </label>
                             <input type="date" id="test-current-date" class="w-full px-3 py-2 text-sm rounded-lg border border-yellow-300 focus:ring-1 focus:ring-yellow-500 outline-none text-gray-700 bg-white shadow-sm" onchange="calculateLeave()">
@@ -54,15 +63,15 @@
                         
                         <div class="bg-gray-50 p-5 rounded-xl border border-gray-100 text-sm space-y-3">
                             <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                                <span id="today-label" class="font-semibold text-gray-500">วันนี้:</span> 
+                                <span id="today-label" class="font-semibold text-gray-500" data-i18n="todayLabel">วันนี้:</span> 
                                 <span id="current-date-display" class="text-gray-800 font-medium">-</span>
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="font-semibold text-gray-500">อายุงาน:</span> 
+                                <span class="font-semibold text-gray-500" data-i18n="tenureLabel">อายุงาน:</span> 
                                 <span id="tenure-display" class="font-bold text-base text-gray-800">-</span>
                             </div>
                             <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                                <span class="font-semibold text-gray-500">สถานะทดลองงาน:</span> 
+                                <span class="font-semibold text-gray-500" data-i18n="probationLabel">สถานะทดลองงาน:</span> 
                                 <span id="probation-status" class="font-bold text-base">-</span>
                             </div>
                         </div>
@@ -70,27 +79,27 @@
                         <!-- ตารางสิทธิวันลา -->
                         <div class="mt-6 border-t border-gray-100 pt-5">
                             <h3 id="table-title" class="text-gray-700 font-bold text-lg mb-3 flex items-center gap-2 transition-colors">
-                                <i data-lucide="list-check" class="w-5 h-5"></i> ตารางสิทธิวันลา
+                                <i data-lucide="list-check" class="w-5 h-5"></i> <span data-i18n="tableTitleText">ตารางสิทธิวันลา</span>
                             </h3>
                             <ul class="space-y-2 text-sm text-gray-700">
                                 <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
-                                    <span>อายุงาน < 2 ปี</span>
-                                    <span class="font-bold text-gray-900 text-base">14 วัน</span>
+                                    <span data-i18n="tier1Text">อายุงาน < 2 ปี</span>
+                                    <span class="font-bold text-gray-900 text-base" data-i18n="tier1Days">14 วัน</span>
                                 </li>
                                 <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
-                                    <span>อายุงาน 2 - < 5 ปี</span>
-                                    <span class="font-bold text-gray-900 text-base">17 วัน</span>
+                                    <span data-i18n="tier2Text">อายุงาน 2 - < 5 ปี</span>
+                                    <span class="font-bold text-gray-900 text-base" data-i18n="tier2Days">17 วัน</span>
                                 </li>
                                 <li class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
-                                    <span>อายุงาน ≥ 5 ปี / บริหาร</span>
-                                    <span class="font-bold text-gray-900 text-base">19 วัน</span>
+                                    <span data-i18n="tier3Text">อายุงาน ≥ 5 ปี / บริหาร</span>
+                                    <span class="font-bold text-gray-900 text-base" data-i18n="tier3Days">19 วัน</span>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
                     <button id="calc-btn" onclick="calculateLeave()" class="w-full mt-6 bg-red-700 text-white py-3.5 rounded-xl font-bold hover:bg-red-800 transition-colors shadow-md active:transform active:scale-95 flex justify-center items-center gap-2">
-                        <i data-lucide="calendar-check" class="w-5 h-5" id="btn-icon"></i> <span id="btn-text">คำนวณสิทธิ</span>
+                        <i data-lucide="calendar-check" class="w-5 h-5" id="btn-icon"></i> <span id="btn-text" data-i18n="calcBtnText">คำนวณสิทธิ</span>
                     </button>
                 </div>
 
@@ -102,8 +111,8 @@
                         <div class="bg-gray-50 p-5 rounded-full inline-block mb-4 border border-gray-100 shadow-sm">
                             <i data-lucide="calendar-search" class="w-16 h-16 text-gray-300"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-600">กรุณาระบุวันที่เริ่มงาน</h3>
-                        <p class="text-sm text-gray-400 mt-2">ระบบจะคำนวณสิทธิวันลาตามระเบียบให้คุณอัตโนมัติ</p>
+                        <h3 class="text-xl font-bold text-gray-600" data-i18n="placeholderTitle">กรุณาระบุวันที่เริ่มงาน</h3>
+                        <p class="text-sm text-gray-400 mt-2" data-i18n="placeholderSub">ระบบจะคำนวณสิทธิวันลาตามระเบียบให้คุณอัตโนมัติ</p>
                     </div>
 
                     <!-- Result State -->
@@ -112,13 +121,13 @@
                             <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider" id="status-badge"></span>
                         </div>
                         <h3 class="text-5xl sm:text-6xl font-extrabold text-gray-800 mb-2 tracking-tight">
-                            <span id="leave-days" class="text-red-600">0</span> <span class="text-2xl sm:text-3xl font-bold text-gray-500">วัน</span>
+                            <span id="leave-days" class="text-red-600">0</span> <span class="text-2xl sm:text-3xl font-bold text-gray-500" data-i18n="unitDays">วัน</span>
                         </h3>
-                        <p id="result-subtitle" class="text-gray-500 mb-8 font-medium">สิทธิวันหยุดพักผ่อนประจำปีของคุณ</p>
+                        <p id="result-subtitle" class="text-gray-500 mb-8 font-medium" data-i18n="resultSubtitle">สิทธิวันหยุดพักผ่อนประจำปีของคุณ</p>
                         
                         <div id="detail-box" class="bg-red-50 rounded-xl p-5 text-left border-l-4 border-red-600 shadow-sm transition-colors">
                             <h4 id="detail-box-title" class="font-bold text-red-800 mb-2 flex items-center gap-2 text-lg transition-colors">
-                                <i data-lucide="info" class="w-5 h-5"></i> รายละเอียดการคำนวณ
+                                <i data-lucide="info" class="w-5 h-5"></i> <span data-i18n="detailTitle">รายละเอียดการคำนวณ</span>
                             </h4>
                             <p id="calculation-detail" class="text-base text-red-700 leading-relaxed transition-colors"></p>
                         </div>
@@ -133,15 +142,166 @@
         let isTestMode = false;
         let logoClickCount = 0;
         let logoClickTimer;
+        
+        // Language State
+        let currentLang = localStorage.getItem('lang') || 'th';
+
+        // Translation Dictionary
+        const translations = {
+            th: {
+                appTitle: "คำนวณสิทธิวันลาพักร้อน",
+                appSubtitle: "ตรวจสอบสิทธิตามอายุงานและนโยบายบริษัท",
+                appTitleDev: "โหมดนักพัฒนา",
+                appSubtitleDev: "สามารถจำลองวันที่ปัจจุบันเพื่อทดสอบระบบได้",
+                startDateLabel: "ระบุวันที่เริ่มงาน",
+                simDateLabel: "จำลองวันที่ปัจจุบัน (เพื่อทดสอบ)",
+                todayLabel: "วันนี้:",
+                todayLabelDev: "วันนี้ (จำลอง):",
+                tenureLabel: "อายุงาน:",
+                probationLabel: "สถานะทดลองงาน:",
+                tableTitleText: "ตารางสิทธิวันลา",
+                tier1Text: "อายุงาน < 2 ปี",
+                tier1Days: "14 วัน",
+                tier2Text: "อายุงาน 2 - < 5 ปี",
+                tier2Days: "17 วัน",
+                tier3Text: "อายุงาน ≥ 5 ปี / บริหาร",
+                tier3Days: "19 วัน",
+                calcBtnText: "คำนวณสิทธิ",
+                calcBtnTextDev: "ทดสอบคำนวณ",
+                placeholderTitle: "กรุณาระบุวันที่เริ่มงาน",
+                placeholderSub: "ระบบจะคำนวณสิทธิวันลาตามระเบียบให้คุณอัตโนมัติ",
+                unitDays: "วัน",
+                resultSubtitle: "สิทธิวันหยุดพักผ่อนประจำปีของคุณ",
+                resultSubtitleDev: "สิทธิวันหยุดพักผ่อนประจำปี (อิงวันที่จำลอง)",
+                detailTitle: "รายละเอียดการคำนวณ",
+                
+                // Dynamic Texts
+                errFutureDate: "วันที่เริ่มงานต้องไม่เกินวันปัจจุบัน",
+                errFutureDateDev: "วันที่เริ่มงานต้องไม่เกินวันที่จำลองทดสอบ",
+                errInvalidDate: "วันที่ไม่ถูกต้อง",
+                
+                statusNotPassed: "ยังไม่ผ่านทดลองงาน",
+                statusPassed: "ผ่านทดลองงานแล้ว",
+                
+                badgeProbation: "อยู่ในช่วงทดลองงาน",
+                badgeProrate: "สิทธิแบบเฉลี่ย (สะสมถึงปัจจุบัน)",
+                badgeNoRights: "ยังไม่ได้รับสิทธิในปีแรก",
+                
+                msgProbation: (days) => `อายุงานปัจจุบันของคุณคือ <strong>${days} วัน</strong><br>ตามนโยบายบริษัท คุณต้องทำงานครบ <strong>119 วัน (ผ่านทดลองงาน)</strong> ก่อน จึงจะมีสิทธิใช้วันหยุดพักผ่อนประจำปีได้`,
+                msgProbationStart: (date) => `<br><br><span class="text-sm mt-2 block opacity-80">คุณจะสามารถเริ่มใช้สิทธิได้ตั้งแต่วันที่: ${date} เป็นต้นไป</span>`,
+                msgFullRights: (tier, days) => `คุณผ่านทดลองงานแล้ว และอายุงานปัจจุบันจัดอยู่ในเกณฑ์ <strong>${tier}</strong><br>ตามนโยบายบริษัท คุณได้รับสิทธิวันหยุดพักผ่อนประจำปี <strong>${days} วัน</strong>`,
+                msgProrateDesc: (startMonth, currentMonth) => `คุณผ่านทดลองงานแล้ว และเริ่มงานในเดือนที่ ${startMonth} (ไม่เกินเดือน 8)<br>ระบบคำนวณสิทธิสะสมตามเดือนที่ทำงานผ่านมาจนถึงเดือนที่คำนวณ (เดือน ${currentMonth}):`,
+                msgFormula: "สูตร:",
+                msgFormulaMath: (base, count, raw) => `(${base} ÷ 12) × ${count} = <span class="text-gray-600">${raw} วัน</span>`,
+                msgRounding: (days) => `ปัดเศษตามเงื่อนไข ได้รับสิทธิจริง ${days} วัน`,
+                msgNoRightsYearOne: (startMonth, days) => `คุณผ่านทดลองงานแล้ว แต่เนื่องจากเริ่มงานในเดือนที่ ${startMonth} (ตั้งแต่เดือน 9 เป็นต้นไป) ตามนโยบายบริษัทจะยังไม่ได้รับสิทธิลาพักร้อนในปีที่เริ่มงาน<br><br>แต่คุณจะได้รับสิทธิ <strong>${days} วันเต็ม</strong> ในวันที่ 1 มกราคม ของปีถัดไป`,
+                
+                formatDate: (dateObj) => dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }),
+                formatTenure: (y, m, d) => `${y} ปี ${m} เดือน (${d} วัน)`
+            },
+            en: {
+                appTitle: "Annual Leave Calculator",
+                appSubtitle: "Check your entitlement based on tenure & policy",
+                appTitleDev: "Developer Mode",
+                appSubtitleDev: "Simulate current date for testing",
+                startDateLabel: "Select Start Date",
+                simDateLabel: "Simulated Current Date (Testing)",
+                todayLabel: "Today:",
+                todayLabelDev: "Today (Simulated):",
+                tenureLabel: "Tenure:",
+                probationLabel: "Probation Status:",
+                tableTitleText: "Leave Entitlement Table",
+                tier1Text: "Tenure < 2 Years",
+                tier1Days: "14 Days",
+                tier2Text: "Tenure 2 - < 5 Years",
+                tier2Days: "17 Days",
+                tier3Text: "Tenure ≥ 5 Years / Mgmt",
+                tier3Days: "19 Days",
+                calcBtnText: "Calculate Leave",
+                calcBtnTextDev: "Test Calculation",
+                placeholderTitle: "Please enter your start date",
+                placeholderSub: "The system will automatically calculate your leave rights.",
+                unitDays: "Days",
+                resultSubtitle: "Your Annual Leave Entitlement",
+                resultSubtitleDev: "Annual Leave Entitlement (Simulated Date)",
+                detailTitle: "Calculation Details",
+                
+                // Dynamic Texts
+                errFutureDate: "Start date cannot be in the future",
+                errFutureDateDev: "Start date cannot exceed simulated date",
+                errInvalidDate: "Invalid Date",
+                
+                statusNotPassed: "On Probation",
+                statusPassed: "Probation Passed",
+                
+                badgeProbation: "On Probation Period",
+                badgeProrate: "Prorated (Accumulated to date)",
+                badgeNoRights: "No rights in first year",
+                
+                msgProbation: (days) => `Your current tenure is <strong>${days} days</strong><br>Per company policy, you must complete <strong>119 days (probation)</strong> before being eligible for annual leave.`,
+                msgProbationStart: (date) => `<br><br><span class="text-sm mt-2 block opacity-80">You will be eligible to use your leave starting from: ${date}</span>`,
+                msgFullRights: (tier, days) => `You have passed probation. Your tenure falls under the <strong>${tier}</strong> bracket.<br>You are entitled to <strong>${days} days</strong> of annual leave.`,
+                msgProrateDesc: (startMonth, currentMonth) => `You have passed probation and started in month ${startMonth} (Aug or earlier).<br>The system calculates accumulated leave up to the calculated month (Month ${currentMonth}):`,
+                msgFormula: "Formula:",
+                msgFormulaMath: (base, count, raw) => `(${base} ÷ 12) × ${count} = <span class="text-gray-600">${raw} Days</span>`,
+                msgRounding: (days) => `After rounding rules, actual entitlement is ${days} Days`,
+                msgNoRightsYearOne: (startMonth, days) => `You passed probation, but since you started in month ${startMonth} (Sep or later), you do not receive leave entitlement in the starting year.<br><br>However, you will receive full <strong>${days} days</strong> on Jan 1st of the following year.`,
+                
+                formatDate: (dateObj) => dateObj.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }),
+                formatTenure: (y, m, d) => `${y} Y ${m} M (${d} Days)`
+            }
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            
+            // Set Language on Load
+            updateStaticText();
+            document.getElementById('lang-text').innerText = currentLang === 'th' ? 'EN' : 'TH';
             
             // เซ็ตวันที่จำลองเริ่มต้น
             const todayStr = new Date().toISOString().split('T')[0];
             const testDateInput = document.getElementById('test-current-date');
             if(testDateInput) testDateInput.value = todayStr;
         });
+
+        function t(key) {
+            return translations[currentLang][key];
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'th' ? 'en' : 'th';
+            localStorage.setItem('lang', currentLang);
+            
+            document.getElementById('lang-text').innerText = currentLang === 'th' ? 'EN' : 'TH';
+            
+            updateStaticText();
+            
+            // Recalculate if there is a value
+            if (document.getElementById('start-date').value) {
+                calculateLeave();
+            }
+        }
+        
+        function updateStaticText() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                
+                // Handle special cases based on Test Mode
+                if (isTestMode) {
+                    if (key === 'appTitle') el.innerText = t('appTitleDev');
+                    else if (key === 'appSubtitle') el.innerText = t('appSubtitleDev');
+                    else if (key === 'todayLabel') el.innerText = t('todayLabelDev');
+                    else if (key === 'calcBtnText') el.innerText = t('calcBtnTextDev');
+                    else if (key === 'resultSubtitle') el.innerText = t('resultSubtitleDev');
+                    else if (translations[currentLang][key]) el.innerText = t(key);
+                } else {
+                    if (translations[currentLang][key]) {
+                        el.innerText = t(key);
+                    }
+                }
+            });
+        }
 
         // ฟังก์ชันตรวจจับการคลิกรัวๆ เพื่อสลับโหมด
         function handleLogoClick() {
@@ -160,42 +320,28 @@
             isTestMode = !isTestMode;
             
             const logo = document.getElementById('logo-icon');
-            const title = document.getElementById('app-title');
-            const subtitle = document.getElementById('app-subtitle');
             const panel = document.getElementById('input-panel');
             const testSection = document.getElementById('test-date-section');
-            const todayLabel = document.getElementById('today-label');
             const calcBtn = document.getElementById('calc-btn');
-            const resultSubtitle = document.getElementById('result-subtitle');
-            const btnText = document.getElementById('btn-text');
             const tableTitle = document.getElementById('table-title');
 
             if (isTestMode) {
                 logo.className = "p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg cursor-pointer transition-colors duration-300 relative group";
                 logo.innerHTML = '<i data-lucide="flask-conical" class="w-6 h-6 sm:w-8 sm:h-8"></i>';
-                title.innerText = "โหมดนักพัฒนา";
-                subtitle.innerText = "สามารถจำลองวันที่ปัจจุบันเพื่อทดสอบระบบได้";
                 panel.classList.replace('border-red-700', 'border-yellow-500');
                 testSection.classList.remove('hidden');
-                todayLabel.innerText = "วันนี้ (จำลอง):";
                 calcBtn.className = "w-full mt-6 bg-yellow-600 text-white py-3.5 rounded-xl font-bold hover:bg-yellow-700 transition-colors shadow-md active:transform active:scale-95 flex justify-center items-center gap-2";
-                resultSubtitle.innerText = "สิทธิวันหยุดพักผ่อนประจำปี (อิงวันที่จำลอง)";
-                btnText.innerText = "ทดสอบคำนวณ";
                 tableTitle.className = "text-yellow-700 font-bold text-lg mb-3 flex items-center gap-2 transition-colors";
             } else {
                 logo.className = "p-3 sm:p-4 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 text-white shadow-lg cursor-pointer transition-colors duration-300 relative group";
                 logo.innerHTML = '<i data-lucide="calculator" class="w-6 h-6 sm:w-8 sm:h-8"></i>';
-                title.innerText = "คำนวณสิทธิวันลาพักร้อน";
-                subtitle.innerText = "ตรวจสอบสิทธิตามอายุงานและนโยบายบริษัท";
                 panel.classList.replace('border-yellow-500', 'border-red-700');
                 testSection.classList.add('hidden');
-                todayLabel.innerText = "วันนี้:";
                 calcBtn.className = "w-full mt-6 bg-red-700 text-white py-3.5 rounded-xl font-bold hover:bg-red-800 transition-colors shadow-md active:transform active:scale-95 flex justify-center items-center gap-2";
-                resultSubtitle.innerText = "สิทธิวันหยุดพักผ่อนประจำปีของคุณ";
-                btnText.innerText = "คำนวณสิทธิ";
                 tableTitle.className = "text-red-700 font-bold text-lg mb-3 flex items-center gap-2 transition-colors";
             }
             
+            updateStaticText();
             lucide.createIcons(); // วาดไอคอนใหม่
 
             // รีเฟรชผลลัพธ์ถ้ามีวันที่กรอกไว้
@@ -222,7 +368,7 @@
             today.setHours(0, 0, 0, 0);
 
             if (startDate > today) {
-                showError(isTestMode ? "วันที่เริ่มงานต้องไม่เกินวันที่จำลองทดสอบ" : "วันที่เริ่มงานต้องไม่เกินวันปัจจุบัน");
+                showError(isTestMode ? t('errFutureDateDev') : t('errFutureDate'));
                 return;
             }
             
@@ -253,31 +399,31 @@
             if (d < 0) { m--; d += 30; } 
             if (m < 0) { y--; m += 12; }
             
-            document.getElementById('current-date-display').innerText = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('current-date-display').innerText = t('formatDate')(today);
             
             const tenureEl = document.getElementById('tenure-display');
-            tenureEl.innerText = `${y} ปี ${m} เดือน (${daysWorked} วัน)`;
+            tenureEl.innerText = t('formatTenure')(y, m, daysWorked);
             tenureEl.className = `font-bold text-base ${isTestMode ? 'text-yellow-600' : 'text-red-600'}`;
             
             const probationStatusEl = document.getElementById('probation-status');
             if (daysWorked < 119) {
-                probationStatusEl.innerText = "ยังไม่ผ่านทดลองงาน";
+                probationStatusEl.innerText = t('statusNotPassed');
                 probationStatusEl.className = "font-bold text-base text-orange-600";
             } else {
-                probationStatusEl.innerText = "ผ่านทดลองงานแล้ว";
+                probationStatusEl.innerText = t('statusPassed');
                 probationStatusEl.className = "font-bold text-base text-green-600";
             }
             
             // --- เตรียมตัวแปรสำหรับคำนวณ Logic ---
             let baseLeave = 14; 
-            let tierText = "อายุงาน < 2 ปี";
+            let tierText = t('tier1Text');
             
             if (tenureYears >= 5) {
                 baseLeave = 19;
-                tierText = "อายุงาน ≥ 5 ปี / บริหาร";
+                tierText = t('tier3Text');
             } else if (tenureYears >= 2) {
                 baseLeave = 17;
-                tierText = "อายุงาน 2 - < 5 ปี";
+                tierText = t('tier2Text');
             }
 
             const startYear = startDate.getFullYear();
@@ -293,19 +439,19 @@
             if (daysWorked < 119) {
                 leaveDays = 0;
                 badgeClass = "bg-orange-100 text-orange-700";
-                badgeText = "อยู่ในช่วงทดลองงาน";
-                message = `อายุงานปัจจุบันของคุณคือ <strong>${daysWorked} วัน</strong><br>ตามนโยบายบริษัท คุณต้องทำงานครบ <strong>119 วัน (ผ่านทดลองงาน)</strong> ก่อน จึงจะมีสิทธิใช้วันหยุดพักผ่อนประจำปีได้`;
+                badgeText = t('badgeProbation');
+                message = t('msgProbation')(daysWorked);
                 
                 let passProbationDate = new Date(startDate);
                 passProbationDate.setDate(passProbationDate.getDate() + 119);
-                message += `<br><br><span class="text-sm ${tc.textMid}">คุณจะสามารถเริ่มใช้สิทธิได้ตั้งแต่วันที่: ${passProbationDate.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })} เป็นต้นไป</span>`;
+                message += t('msgProbationStart')(t('formatDate')(passProbationDate));
 
             } else {
                 if (currentYear > startYear) {
                     leaveDays = baseLeave;
                     badgeClass = "bg-green-100 text-green-700";
                     badgeText = tierText;
-                    message = `คุณผ่านทดลองงานแล้ว และอายุงานปัจจุบันจัดอยู่ในเกณฑ์ <strong>${tierText}</strong><br>ตามนโยบายบริษัท คุณได้รับสิทธิวันหยุดพักผ่อนประจำปี <strong>${baseLeave} วัน</strong>`;
+                    message = t('msgFullRights')(tierText, baseLeave);
                     
                 } else if (currentYear === startYear) {
                     if (startMonth <= 8) {
@@ -331,21 +477,20 @@
                         }
                         
                         badgeClass = "bg-blue-100 text-blue-700"; 
-                        badgeText = "สิทธิแบบเฉลี่ย (สะสมถึงปัจจุบัน)";
+                        badgeText = t('badgeProrate');
                         message = `
-                            คุณผ่านทดลองงานแล้ว และเริ่มงานในเดือนที่ ${startMonth} (ไม่เกินเดือน 8)<br>
-                            ระบบคำนวณสิทธิสะสมตามเดือนที่ทำงานผ่านมาจนถึงเดือนที่คำนวณ (เดือน ${currentTestMonth}):
+                            ${t('msgProrateDesc')(startMonth, currentTestMonth)}
                             <div class="bg-white/60 p-3 rounded-lg mt-3 mb-2 border ${tc.borderLight} text-sm font-medium text-gray-800 shadow-sm">
-                                <span class="text-gray-500 block mb-1 text-xs">สูตร: (${baseLeave} วัน ÷ 12 เดือน) × เดือนที่นับถึงปัจจุบัน (${monthsToCount} เดือน)</span>
-                                (${baseLeave} ÷ 12) × ${monthsToCount} = <span class="text-gray-600">${rawLeave.toFixed(2)} วัน</span>
-                                <span class="${tc.textMain} font-bold text-base mt-1.5 block pt-1.5 border-t ${tc.borderLight}">ปัดเศษตามเงื่อนไข ได้รับสิทธิจริง ${leaveDays} วัน</span>
+                                <span class="text-gray-500 block mb-1 text-xs">${t('msgFormula')} (${baseLeave} ÷ 12) × ${monthsToCount}</span>
+                                ${t('msgFormulaMath')(baseLeave, monthsToCount, rawLeave.toFixed(2))}
+                                <span class="${tc.textMain} font-bold text-base mt-1.5 block pt-1.5 border-t ${tc.borderLight}">${t('msgRounding')(leaveDays)}</span>
                             </div>
                         `;
                     } else {
                         leaveDays = 0;
                         badgeClass = "bg-gray-100 text-gray-700"; 
-                        badgeText = "ยังไม่ได้รับสิทธิในปีแรก";
-                        message = `คุณผ่านทดลองงานแล้ว แต่เนื่องจากเริ่มงานในเดือนที่ ${startMonth} (ตั้งแต่เดือน 9 เป็นต้นไป) ตามนโยบายบริษัทจะยังไม่ได้รับสิทธิลาพักร้อนในปีที่เริ่มงาน<br><br>แต่คุณจะได้รับสิทธิ <strong>${baseLeave} วันเต็ม</strong> ในวันที่ 1 มกราคม ของปีถัดไป`;
+                        badgeText = t('badgeNoRights');
+                        message = t('msgNoRightsYearOne')(startMonth, baseLeave);
                     }
                 }
             }
@@ -373,7 +518,7 @@
             
             const resultBadge = document.getElementById('status-badge');
             resultBadge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isTestMode ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`;
-            resultBadge.innerText = "วันที่ไม่ถูกต้อง";
+            resultBadge.innerText = t('errInvalidDate');
             
             const leaveEl = document.getElementById('leave-days');
             leaveEl.innerText = "0"; 
